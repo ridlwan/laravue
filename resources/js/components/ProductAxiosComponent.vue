@@ -230,6 +230,8 @@
                 this.product.description = '';
                 this.product.price = '';
                 this.product.amount = '';
+
+                this.errors = []
             }
         },   
     }

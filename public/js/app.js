@@ -1997,6 +1997,7 @@ __webpack_require__.r(__webpack_exports__);
       this.product.description = '';
       this.product.price = '';
       this.product.amount = '';
+      this.errors = [];
     }
   }
 });
