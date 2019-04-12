@@ -1,0 +1,219 @@
+<template>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row">
+                <div v-for="product in products" v-bind:key="product.id" class="card card-body col-md-4">
+                    <h4>{{ product.name }}</h4>
+                    <p>{{ product.description }}</p>
+                    <div class="row">
+                        <div class="col-md-6">Stock {{ product.amount }}</div>
+                        <div class="col-md-6 text-right">Rp. {{ product.price }}</div>
+                    </div>
+                    <p class="text-right mt-2">
+                        <button @click="editProduct(product)" class="btn btn-warning">Edit</button>
+                        <button @click="deleteProduct(product.id)" class="btn btn-danger">Delete</button>
+                    </p>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-8">
+                    <nav>
+                        <ul class="pagination">
+                            <li v-bind:class="{disabled:!pagination.first_link}" class="page-item"><a href="#" @click="viewProduct(pagination.first_link)" class="page-link">&laquo;</a></li>
+                            <li v-bind:class="{disabled:!pagination.prev_link}" class="page-item"><a href="#" @click="viewProduct(pagination.prev_link)" class="page-link">&lt;</a></li>
+                            <li v-for="n in pagination.last_page" v-bind:key="n" v-bind:class="{active: pagination.current_page == n}" class="page-item"><a href="#" @click="viewProduct(pagination.path_page + n)" class="page-link">{{ n }}</a></li>
+                            <li v-bind:class="{disabled:!pagination.next_link}" class="page-item"><a href="#" @click="viewProduct(pagination.next_link)" class="page-link">&gt;</a></li>
+                            <li v-bind:class="{disabled:!pagination.last_link}" class="page-item"><a href="#" @click="viewProduct(pagination.last_link)" class="page-link">&raquo;</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <!-- <div class="col-md-4">
+                    Page: {{ pagination.from_page }} - {{ pagination.to_page }}
+                    Total: {{ pagination.total_page }}
+                </div> -->
+            </div>
+        </div>
+        <div class="col-md-4">
+            <form>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="form-control" v-model="product.name">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea type="text" class="form-control" v-model="product.description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" class="form-control" v-model="product.price">
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" class="form-control" v-model="product.amount">
+                </div>
+                <button v-if="add" @click.prevent="addProduct()" class="btn btn-primary">Add Product</button>
+                <button v-if="edit" @click.prevent="updateProduct(product.id)" class="btn btn-warning">Edit Product</button>
+                <button @click.prevent="productClear()" class="btn btn-info">Clear</button>
+            </form>
+        </div>
+    </div>    
+</template>
+
+<style>
+    .product-item{
+        width: 350px;
+        float: left;
+    }
+</style>
+
+<script>
+    export default {
+        data() {
+            return {
+                products: [],
+                product: {
+                    id: '',
+                    name: '',
+                    description: '',
+                    price: '',
+                    amount: ''
+                },
+                add: true,
+                edit: false,
+                pagination: {},
+                offset: 3
+            }
+        },
+        created() {
+            this.viewProduct();
+        },
+        methods: {
+            viewProduct(paginate) {
+                paginate = paginate || 'api/products';
+                
+                fetch(paginate)
+                .then(res => res.json())
+                .then(res => {
+                    this.products = res.data;
+
+                    if (!res.meta.to) {
+                        return [];
+                    }
+                    var from = res.meta.current_page - this.offset;
+                    if (from < 1) {
+                        from = 1;
+                    }
+                    var to = from + (this.offset * 2);
+                    if (to >= res.meta.last_page) {
+                        to = res.meta.last_page;
+                    }
+                    var pagesArray = [];
+                    while (from <= to) {
+                        pagesArray.push(from);
+                        from++;
+                    }
+
+                    this.pagination = {
+                        current_page: res.meta.current_page,
+                        last_page: pagesArray,
+                        from_page: res.meta.from,
+                        to_page: res.meta.to,
+                        total_page: res.meta.total,
+                        path_page: res.meta.path+'?page=',
+                        first_link: res.links.first,
+                        last_link: res.links.last,
+                        prev_link: res.links.prev,
+                        next_link: res.links.next
+                    };
+                })
+                .catch(err => console.log(err));
+            },
+            addProduct() {
+                fetch('api/products', {
+                    method: 'post',
+                    body: JSON.stringify(this.product),
+                    headers: {
+                        'content-type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    swal('Successful!', 'Product has been added', 'success');
+                    this.product.name = '';
+                    this.product.description = '';
+                    this.product.price = '';
+                    this.product.amount = '';
+                    this.viewProduct();
+                })
+                .catch(err => {
+                    swal('Failed!', 'Product fail to add', 'error');
+                });
+            },
+            editProduct(pro) {
+                this.add = false;
+                this.edit = true;
+                this.product.id = pro.id;
+                this.product.name = pro.name;
+                this.product.description = pro.description;
+                this.product.price = pro.price;
+                this.product.amount = pro.amount;
+            },
+            updateProduct(id) {
+                fetch(`api/products/${id}`, {
+                    method: 'put',
+                    body: JSON.stringify(this.product),
+                    headers: {
+                        'content-type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    swal('Successful!', 'Product has been updated', 'success');
+                    this.add = true;
+                    this.edit = false;
+                    this.product.name = '';
+                    this.product.description = '';
+                    this.product.price = '';
+                    this.product.amount = '';
+                    this.viewProduct();
+                })
+                .catch(err => {
+                    swal('Failed!', 'Product fail to update', 'error');
+                });
+            },
+            deleteProduct(id) {
+                swal({
+                    title: 'Are you sure?',
+                    text: 'Product will be delete',
+                    icon: 'warning',
+                    buttons: true,
+                    dangerMode: true
+                })
+                .then((willdelete) => {
+                    if(willdelete) {
+                        fetch(`api/products/${id}`, {
+                            method: 'delete'
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            swal('Successful!', 'Product has been deleted', 'success');
+                            this.viewProduct();
+                        })
+                        .catch(err => {
+                            swal('Failed!', 'Product fail to delete', 'error');
+                        });
+                    }
+                })
+            },
+            productClear() {
+                this.add = true;
+                this.edit = false;
+                this.product.id = '';
+                this.product.name = '';
+                this.product.description = '';
+                this.product.price = '';
+                this.product.amount = '';
+            }
+        },   
+    }
+</script>
