@@ -20,7 +20,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    {{-- <link href="{{ asset('css/dataTables.bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/dataTables.bootstrap.css') }}" rel="stylesheet">
     <script src="{{ asset('js/jquery.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/jquery.dataTables.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/dataTables.bootstrap4.js') }}" type="text/javascript"></script>
@@ -28,7 +28,7 @@
     <link href="{{ asset('css/font-awesome.css') }}" rel="stylesheet"/>
 
     <link href="{{ asset('css/dropzone.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/dropzone.js') }}"></script> --}}
+    <script src="{{ asset('js/dropzone.js') }}"></script>
 </head>
 <body>
     <div id="app">
@@ -57,8 +57,8 @@
                     <ul class="navbar-nav ml-auto">
                         <!-- Authentication Links -->
                         @guest
-                            {{-- <li><a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li> --}}
-                            {{-- <li><a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a></li> --}}
+                            <li><a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li>
+                            <li><a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a></li>
                         @else
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
