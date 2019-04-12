@@ -12,7 +12,7 @@
                                 <th width="100">Quantity</th>
                             </thead>
                             <tbody>
-                                <tr v-for="cart in carts" v-bind:key="cart.id">
+                                <tr v-for="cart in carts" :key="cart.id">
                                     <td>{{ cart.name }}</td>
                                     <td>Rp. {{ cart.price }}</td>
                                     <td>{{ cart.amount }}</td>
